@@ -6,7 +6,7 @@ struct struct_link {
   int to;
   double bw;
 };
-
+//store the global mapping data in design;Noted by xym
 struct request {
   int split;
   int time;
@@ -27,6 +27,7 @@ struct substrate_network {
 };
 
 struct s2v_node {
+  //'req_count' for amount of req at this note; Noted by xym
   int req_count;
   int req[MAX_REQ_PER_NODE];
   int vnode[MAX_REQ_PER_NODE];
@@ -50,7 +51,9 @@ struct path {
 };
 
 #define MAX_SLINK_PER_VLINK 100
+//store the global mapping data in reality;Noted by xym
 struct req2sub {
+  //'map' for the state of mapping; Noted by xym
   int map; 
   int maptime;
   int snode[MAX_REQ_NODES];
@@ -59,6 +62,7 @@ struct req2sub {
 
 struct shortest_path {
   int length;
+  //'next' represent next hop in Floyd matrix;Noted by xym
   int next;
 };
 

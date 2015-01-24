@@ -212,7 +212,17 @@ int map_node_star(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2s
       v2s[index].map = STATE_MAP_NODE_FAIL;
       printf("req %d unsatisfied\n", index);
       for (j = 0; j < i; j ++) {
-        remove_node_map(s2v_n, v2s[index].snode[j], j);
+        /*modified by zzb*/
+        int snode = v2s[index].snode[j];
+		int k;
+        for (k =0; k < s2v_n[snode].req_count; k++) 
+          {    
+            if(s2v_n[snode].req[k] == index)
+              {    
+                remove_node_map(s2v_n, v2s[index].snode[j], k);
+              }    
+
+          }
       }
       return -1;
     }
@@ -243,7 +253,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
 
   memcpy(s2v_ltmp3, s2v_l, sizeof(struct s2v_link)*sub.links);
   //printf("*** begin unsplittalbe flow\n");
-
+  //store path represent virtual link;Noted by xym
   struct path pathtmp[MAX_REQ_LINKS*MAX_REQ_NODES];
   int lentmp = 0;
 
@@ -255,6 +265,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
     
     int rid = -1;
     int rev = -1;
+    //find the req of the greatest revenue; Noted by xym 
     for (t = start; t <=end; t ++) {
       if ((v2s[t].map == STATE_MAP_NODE || (v2s[t].map == STATE_MAP_LINK && option == ROUTE_MIGRATION)) && req[t].revenue > rev && checked[t] == 0) {
         rid = t;
@@ -262,6 +273,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
       }
     }
     if (rid == -1) break;
+    //use checked field to exclude distributed reqs;Noted by xym
     checked[rid] = 1;
 
     i = rid;
@@ -270,6 +282,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
       flag = 0;
       if (req[i].split == LINK_UNSPLITTABLE) {
         for (j = 0; j < req[i].links; j ++) {
+          //'from' and 'to' are physical node;Noted by xym
           from = v2s[i].snode[req[i].link[j].from];
           to = v2s[i].snode[req[i].link[j].to];
           int newflag = 0;
@@ -278,6 +291,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
           memcpy(s2v_ltmp4, s2v_ltmp3, sizeof(struct s2v_link)*sub.links);  
 
           while (from != to) {            
+            //Explanation:Every node have sub.nodes shortest path,Floyd method is used here;Noted by xym
             next = spath[from * sub.nodes +to].next;
             if (next == -1) {
               flag = 1;
@@ -324,6 +338,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
                       break;
                   }
                   if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw) {
+                    //why is 'flag' not set to 1?;Noted by xym
                     newflag = 1;
                     break;
                   }
