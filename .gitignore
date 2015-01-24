@@ -1,0 +1,14 @@
+*.o
+*.trace
+*.png
+*.eps
+*.dat
+*.txt
+!sub.txt
+*.out
+*.jpg
+*.bak
+topo-*
+req-*
+requests-*
+stat.*
