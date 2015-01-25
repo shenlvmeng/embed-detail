@@ -547,7 +547,7 @@ int check_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2sub 
   *vlink = -1;
 
   fp = fopen("ltest.lst", "r");
-
+  //get STATUS value;Noted by xym
   while (fgets(str, MAX_LEN, fp) != NULL) {
     if (strstr(str, "STATUS") != NULL) {
       break;
@@ -1272,7 +1272,7 @@ int main(int argc, char ** argv) {
     char tracename[LEN_FILENAME];
     sprintf(tracename,"%s-%d.trace", argv[3], (int)delay);
     FILE * ftrace = fopen(tracename, "w");
-
+    //'n' for the number of requests;Noted by xym
     while (end < n || finish == 0) {
       finish = 1;
       for (i = 0; i < end; i ++) {
