@@ -41,12 +41,15 @@ struct s2v_link {
   int vlink[MAX_REQ_LINKS];
   double bw[MAX_REQ_LINKS];
   double rest_bw;
+  int vlan[MAX_REQ_LINKS];
+  int rest_vlan[MAX_VLAN_PER_LINK];
 };
 
 #define MAX_SNODE_PER_PATH 100
 struct path {
   int len; //# of nodes on the path
   int link[MAX_SNODE_PER_PATH];
+  int vlan[MAX_SNODE_PER_PATH];
   double bw;
 };
 

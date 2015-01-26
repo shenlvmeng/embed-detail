@@ -36,7 +36,8 @@ void add_node_map(struct s2v_node * s2v_n, struct req2sub * v2s, int snode, int 
 }
 
 void remove_link_map(struct s2v_link * s2v_l, int slink, int index) {
-  int l;
+  int l, m, vindex;
+  vindex = s2v_l[slink].vlan[index];
   s2v_l[slink].rest_bw += s2v_l[slink].bw[index];
 
   //printf("slink %d rv bw %lf rest_bw %lf\n", slink, s2v_l[slink].bw[index], s2v_l[slink].rest_bw);
@@ -45,20 +46,25 @@ void remove_link_map(struct s2v_link * s2v_l, int slink, int index) {
     s2v_l[slink].req[l] = s2v_l[slink].req[l+1];
     s2v_l[slink].vlink[l] = s2v_l[slink].req[l+1];
     s2v_l[slink].bw[l] = s2v_l[slink].bw[l+1];
+    s2v_l[slink].vlan[l] = s2v_l[slink].vlan[l+1];
   }
+  s2v_l[slink].rest_vlan[(MAX_VLAN_PER_LINK-s2v_l[slink].count)] = vindex;
   s2v_l[slink].count --;
   //printf("s2v_l %d\n", s2v_l[slink].count);
 }
 
 void add_link_map(struct s2v_link * s2v_l, int slink, int reqid, int vlink) {
   int t = s2v_l[slink].count;
+  int vindex = s2v_l[slink].rest_vlan[MAX_VLAN_PER_LINK - t - 1];
 
   //printf("slink %d s2v_l %d\n", slink, t);
 
   s2v_l[slink].req[t] = reqid;
   s2v_l[slink].vlink[t] = vlink;
   s2v_l[slink].bw[t] = req[reqid].link[vlink].bw;
+  s2v_l[slink].vlan[t] = vindex;
   s2v_l[slink].rest_bw -= req[reqid].link[vlink].bw;
+  s2v_l[slink].rest_vlan[MAX_VLAN_PER_LINK -t -1] = -1;
 
   /*if (s2v_l[slink].rest_bw < 0) 
     printf("add bw reqid %d vlink %d bw %lf\n", reqid, vlink, req[reqid].link[vlink].bw);
