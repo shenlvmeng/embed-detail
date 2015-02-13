@@ -236,6 +236,7 @@ int map_node_star(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2s
 }
 
 int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2sub * v2s, int start, int end, int option, int * slink, int * vlink, int time) {
+  printf("%d \n",1);
   int i, j, k, t, index = -1;
   int flag, from, to, next; 
 
@@ -261,6 +262,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
   memset(checked, 0, MAX_REQUESTS);
 
   //for (i = start; i <= end; i ++) {
+  //
   while(1) {
     
     int rid = -1;
@@ -272,6 +274,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
         rev = req[t].revenue;
       }
     }
+    
     if (rid == -1) break;
     //use checked field to exclude distributed reqs;Noted by xym
     checked[rid] = 1;
@@ -306,7 +309,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
               flag = 1;
               break;
             }
-            vt = s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1]
+            vt = s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1];
             s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1] = -1;
             s2v_ltmp3[k].rest_bw -= req[i].link[j].bw;
             from = next;
@@ -346,7 +349,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
                     newflag = 1;
                     break;
                   }
-                  vt = s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1]
+                  vt = s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1];
                   s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1] = -1;
                   s2v_ltmp3[k].rest_bw -= req[i].link[j].bw;
                   from = next;
@@ -417,7 +420,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
   return index;
 }
 
-int multicommodity_flow(struct s1v_node * s2v_n, struct s2v_link * s2v_l, struct req2sub * v2s, int start, int end, int option) {
+int multicommodity_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2sub * v2s, int start, int end, int option) {
   FILE * fp;
   fp = fopen("ltest.dat", "w");
 
@@ -864,6 +867,7 @@ int allocate(int start, int end, int time) {
   int checked[MAX_REQUESTS];
   memset(checked, 0, MAX_REQUESTS);
   int more = 1;
+
   while (more == 1) {
     more = 0;
     int t;
@@ -1293,6 +1297,7 @@ int main(int argc, char ** argv) {
     sprintf(tracename,"%s-%d.trace", argv[3], (int)delay);
     FILE * ftrace = fopen(tracename, "w");
     //'n' for the number of requests;Noted by xym
+    
     while (end < n || finish == 0) {
       finish = 1;
       for (i = 0; i < end; i ++) {
