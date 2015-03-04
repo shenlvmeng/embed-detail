@@ -49,7 +49,6 @@ struct s2v_link {
 struct path {
   int len; //# of nodes on the path
   int link[MAX_SNODE_PER_PATH];
-  int vlan[MAX_SNODE_PER_PATH];
   double bw;
 };
 

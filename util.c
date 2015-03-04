@@ -37,6 +37,7 @@ void add_node_map(struct s2v_node * s2v_n, struct req2sub * v2s, int snode, int 
 
 void remove_link_map(struct s2v_link * s2v_l, int slink, int index) {
   int l, m, vindex;
+  int t = s2v_l[slink].count - 1;
   vindex = s2v_l[slink].vlan[index];
   s2v_l[slink].rest_bw += s2v_l[slink].bw[index];
 
@@ -48,14 +49,14 @@ void remove_link_map(struct s2v_link * s2v_l, int slink, int index) {
     s2v_l[slink].bw[l] = s2v_l[slink].bw[l+1];
     s2v_l[slink].vlan[l] = s2v_l[slink].vlan[l+1];
   }
-  s2v_l[slink].rest_vlan[(MAX_VLAN_PER_LINK-s2v_l[slink].count)] = vindex;
+  s2v_l[slink].rest_vlan[t] = vindex;
   s2v_l[slink].count --;
   //printf("s2v_l %d\n", s2v_l[slink].count);
 }
 
 void add_link_map(struct s2v_link * s2v_l, int slink, int reqid, int vlink) {
   int t = s2v_l[slink].count;
-  int vindex = s2v_l[slink].rest_vlan[MAX_VLAN_PER_LINK - t - 1];
+  int vindex = s2v_l[slink].rest_vlan[t];
 
   //printf("slink %d s2v_l %d\n", slink, t);
 
@@ -64,7 +65,7 @@ void add_link_map(struct s2v_link * s2v_l, int slink, int reqid, int vlink) {
   s2v_l[slink].bw[t] = req[reqid].link[vlink].bw;
   s2v_l[slink].vlan[t] = vindex;
   s2v_l[slink].rest_bw -= req[reqid].link[vlink].bw;
-  s2v_l[slink].rest_vlan[MAX_VLAN_PER_LINK -t -1] = -1;
+  s2v_l[slink].rest_vlan[t] = -1;
 
   /*if (s2v_l[slink].rest_bw < 0) 
     printf("add bw reqid %d vlink %d bw %lf\n", reqid, vlink, req[reqid].link[vlink].bw);
@@ -192,9 +193,12 @@ void calc_shortest_path(struct shortest_path * spath, struct substrate_network *
 
 void init_s2v_l(struct s2v_link * s2v_l) {
   memset(s2v_l, 0, sizeof(struct s2v_link)* sub.links);
-  int i;
+  int i, t;
   for (i = 0; i < sub.links; i ++) {
     s2v_l[i].rest_bw = sub.link[i].bw;
+    for(t = 0; t < MAX_VLAN_PER_LINK; t ++){
+        s2v_l[i].rest_vlan[t] = t;
+    }
   }
 }
 
@@ -227,8 +231,9 @@ void print_map(struct req2sub * v2s) {
 void print_s2v_l(struct s2v_link * s2v_l) {
   int i;
   for (i = 0; i < sub.links; i ++) {
+    int rest = s2v_l[i].count;
     if (s2v_l[i].rest_bw < 100) {
-      printf("sublink %d rest_bw %lf\n",i, s2v_l[i].rest_bw); 
+      printf("sublink %d rest_bw %lf rest_vlan %d\n",i, s2v_l[i].rest_bw, s2v_l[i].rest_vlan[rest]); 
     }
   }
 }

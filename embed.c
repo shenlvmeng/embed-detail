@@ -236,7 +236,6 @@ int map_node_star(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2s
 }
 
 int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2sub * v2s, int start, int end, int option, int * slink, int * vlink, int time) {
-  printf("%d \n",1);
   int i, j, k, t, index = -1;
   int flag, from, to, next; 
 
@@ -289,7 +288,6 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
           from = v2s[i].snode[req[i].link[j].from];
           to = v2s[i].snode[req[i].link[j].to];
           int newflag = 0;
-          int vt = -1;
           t = 0;
           
           memcpy(s2v_ltmp4, s2v_ltmp3, sizeof(struct s2v_link)*sub.links);  
@@ -305,16 +303,15 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
               if ((sub.link[k].from == from && sub.link[k].to == next) || (sub.link[k].from == next && sub.link[k].to == from)) 
                 break;
             }
-            if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[0] == -1) {
+            if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] == -1) {
               flag = 1;
               break;
             }
-            vt = s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1];
-            s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1] = -1;
+            s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] = -1;
             s2v_ltmp3[k].rest_bw -= req[i].link[j].bw;
+            s2v_ltmp3[k].count ++;
             from = next;
             pathtmp[lentmp].link[t] = k;
-            pathtmp[lentmp].vlan[t] = vt;
             t ++;
           }
 
@@ -344,17 +341,16 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
                     if ((sub.link[k].from == from && sub.link[k].to == next) || (sub.link[k].from == next && sub.link[k].to == from)) 
                       break;
                   }
-                  if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[0] == -1) {
+                  if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] == -1) {
                     //why is 'flag' not set to 1?;Noted by xym
                     newflag = 1;
                     break;
                   }
-                  vt = s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1];
-                  s2v_ltmp3[k].rest_vlan[MAX_VLAN_PER_LINK - s2v_ltmp3[k].count -1] = -1;
+                  s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] = -1;
                   s2v_ltmp3[k].rest_bw -= req[i].link[j].bw;
+                  s2v_ltmp3[k].count ++;
                   from = next;
                   pathtmp[lentmp].link[t] = k;
-                  pathtmp[lentmp].vlan[t] = vt;
                   t ++;
                 }
                 if (flag == 1) break;
@@ -405,7 +401,6 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
           v2s[i].spath[j].bw = req[i].link[j].bw;
           for (k = 0; k < pathtmp[l].len; k ++) {
             v2s[i].spath[j].link[k] = pathtmp[l].link[k];
-            v2s[i].spath[j].vlan[k] = pathtmp[l].vlan[k];
             add_link_map(s2v_l, pathtmp[l].link[k], i, j);            
           }
           l ++;
@@ -1228,8 +1223,9 @@ int main(int argc, char ** argv) {
     for (j = 0; j < sub.links; j ++) {
       fscanf(fp, "%d %d %lf\n", &sub.link[j].from, &sub.link[j].to, &sub.link[j].bw);
       s2v_l[j].rest_bw = sub.link[j].bw;
+      
       for(t = 0; t < MAX_VLAN_PER_LINK; t ++) {
-          s2v_l[j].vlan[t] = t;
+          s2v_l[j].rest_vlan[t] = t;
       }
     }
 
