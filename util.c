@@ -194,6 +194,9 @@ void init_s2v_l(struct s2v_link * s2v_l) {
   int i, t;
   for (i = 0; i < sub.links; i ++) {
     s2v_l[i].rest_bw = sub.link[i].bw;
+    for(t = 0; t < MAX_REQ_LINKS; t ++){
+        s2v_l[i].vlan[t] = -1;
+    }
     for(t = 0; t < MAX_VLAN_PER_LINK; t ++){
         s2v_l[i].rest_vlan[t] = t;
     }
@@ -230,7 +233,7 @@ void print_s2v_l(struct s2v_link * s2v_l) {
   int i;
   for (i = 0; i < sub.links; i ++) {
     int rest = s2v_l[i].count;
-    if (s2v_l[i].rest_bw < 100) {
+    if (s2v_l[i].rest_bw < 100 || s2v_l[i].rest_vlan[rest] != -1) {
       printf("sublink %d rest_bw %lf rest_vlan %d\n",i, s2v_l[i].rest_bw, s2v_l[i].rest_vlan[rest]); 
     }
   }

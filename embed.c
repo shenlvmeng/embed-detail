@@ -73,9 +73,10 @@ int find_proper_node(struct s2v_node * s2v_n, struct s2v_link * s2v_l, double cp
 
 //Based on the fact that the node can feed the CPU need, find a node that has minimum resource with links connected with it.
 int find_MinNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v_l, double cpu, int index) {
-  int i, j, snode = -1;
+  int i, j, k, snode = -1;
+  int m = 0;
   double min = -1;
-  double diff, sum;
+  double diff, sum, vsum;
   for(i = 0; i < sub.nodes; i ++) {
     int exist = 0;
     for (j = 0; j < s2v_n[i].req_count; j ++) {
@@ -86,14 +87,28 @@ int find_MinNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
     }
     if (exist == 1) continue;
     diff = s2v_n[i].rest_cpu - cpu;
-    sum = 0;
+    sum = 0;vsum = 0;m = 0;
     if (diff < 0) continue;
-    for (j = 0; j < sub.links; j ++)
+    for (j = 0; j < sub.links; j ++){
       if (sub.link[j].from == i || sub.link[j].to == i) {
         if (s2v_l[j].rest_bw > 0)
           sum += s2v_l[j].rest_bw;
+        if (s2v_l[j].rest_vlan[s2v_l[j].count] != -1)
+          vsum += MAX_VLAN_PER_LINK - s2v_l[j].count;
+        if(sub.link[j].from == i){
+            for(k = 0; k < s2v_n[sub.link[j].to].req_count; k++){
+                if(s2v_n[sub.link[j].to].req[k] == index)
+                    m++;
+            }
+        }else{
+            for(k = 0; k < s2v_n[sub.link[j].from].req_count; k++){
+                if(s2v_n[sub.link[j].from].req[k] == index)
+                    m++;
+            }
+        }
       }
-    diff *=sum;
+    }
+    diff *=(sum*vsum*pow(NODE_WEIGHT_BASE,m+0.0));
     if (diff < min || min == -1) {
       min = diff;
       snode = i;
@@ -106,9 +121,10 @@ int find_MinNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
 //Based on the fact that the node can feed the CPU need, find a node that has maximum resource with links connected with it.
 //p.s. While finding whether need has existed, 'exclude' set the exclude point. Maybe it will be used behind.
 int find_MaxNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v_l, double cpu, int index, int exclude) {
-  int i, j, snode = -1;
+  int i, j, k, snode = -1;
+  int m = 0;
   double max = -1;
-  double diff, sum;
+  double diff, sum, vsum;
   for(i = 0; i < sub.nodes; i ++) {
     if (i == exclude) continue;
     int exist = 0;
@@ -120,14 +136,28 @@ int find_MaxNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
     }
     if (exist == 1) continue;
     diff = s2v_n[i].rest_cpu - cpu;
-    sum = 0;
+    sum = 0;vsum = 0;m = 0;
     if (diff <= 0) continue;
-    for (j = 0; j < sub.links; j ++)
+    for (j = 0; j < sub.links; j ++){
       if (sub.link[j].from == i || sub.link[j].to == i) {
         if (s2v_l[j].rest_bw > 0)
           sum += s2v_l[j].rest_bw;
+        if (s2v_l[j].rest_vlan[s2v_l[j].count] != -1)
+          vsum += MAX_VLAN_PER_LINK - s2v_l[j].count;
+        if(sub.link[j].from == i){
+            for(k = 0; k < s2v_n[sub.link[j].to].req_count; k++){
+                if(s2v_n[sub.link[j].to].req[k] == index)
+                    m++;
+            }
+        }else{
+            for(k = 0; k < s2v_n[sub.link[j].from].req_count; k++){
+                if(s2v_n[sub.link[j].from].req[k] == index)
+                    m++;
+            }
+        }
       }
-    diff *=sum;
+    }
+    diff *=(sum*vsum*pow(NODE_WEIGHT_BASE,m+0.0));
     if (diff > max) {
       max = diff;
       snode = i;
