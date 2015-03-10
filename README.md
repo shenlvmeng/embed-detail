@@ -1,0 +1,2 @@
+# embed-detail
+embed
