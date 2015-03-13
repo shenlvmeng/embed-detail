@@ -864,6 +864,8 @@ double calculate_cost(struct req2sub * v2s, int start, int end) {
         bwsum += req[i].link[j].bw;
         //reqcost += req[i].link[j].bw * v2s[i].spath[j].len;
         reqcost += v2s[i].spath[j].bw * v2s[i].spath[j].len;
+        //add VLAN as costs;Noted by xym
+        reqcost += 1 * v2s[i].spath[j].len;
       }
       opcost +=reqcost;
       count ++;
@@ -1309,7 +1311,8 @@ int main(int argc, char ** argv) {
 
     for (j = 0; j < req[i].links; j ++) {
       fscanf(fp, "%d %d %lf\n", &req[i].link[j].from, &req[i].link[j].to, &req[i].link[j].bw);
-      req[i].revenue += req[i].link[j].bw;
+      //add VLAN as revenue;Noted by xym
+      req[i].revenue += (req[i].link[j].bw+1);
     }    
 
     fclose(fp);
