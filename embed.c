@@ -19,6 +19,7 @@ struct shortest_path * spath;
 
 int error_count_other;
 int error_count_vlan;
+int error_count_normal;
 
 #define TIME_INTERVAL 100
 #define MAX_DOUBLE 1000000
@@ -124,9 +125,9 @@ int find_MinNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
 //Based on the fact that the node can feed the CPU need, find a node that has maximum resource with links connected with it.
 //p.s. While finding whether need has existed, 'exclude' set the exclude point. Maybe it will be used behind.
 int find_MaxNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v_l, double cpu, int index, int exclude) {
-  int i, j, k, snode = -1;
+  int i, j, k, snode = 0;
   int m = 0;
-  double max = -1;
+  double max = 0;
   double diff, sum, vsum;
   for(i = 0; i < sub.nodes; i ++) {
     if (i == exclude) continue;
@@ -163,10 +164,22 @@ int find_MaxNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
     diff *=(sum*vsum*pow(NODE_WEIGHT_BASE,m+0.0));
     if (diff > max) {
       max = diff;
-      if(vsum == 0)
+      snode = i;
+    }else{
+      if(snode == 0){
+        if(sum <= 0) 
+          snode = -1;
+        else if(vsum <= 0) 
           snode = -2;
-      else
-          snode = i;
+      }
+      else if(snode == -1){
+        if(vsum <= 0) 
+          snode = -3;
+      }
+      else if(snode == -2){
+        if(sum <= 0) 
+          snode = -3;
+      }
     }
   }
 
@@ -207,7 +220,8 @@ int map_node_greedy(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req
     t = find_MaxNeighborResource_node(s2v_n, s2v_l, req[index].cpu[i], index, -1);
     if (t < 0) {
       if(t == -2) error_count_vlan ++;
-      else error_count_other ++;
+      else if(t == -1) error_count_other ++;
+      else if(t == -3) error_count_normal ++;
       v2s[index].map = STATE_MAP_NODE_FAIL;
       printf("req %d unsatisfied\n", index);
       for (j = 0; j < i; j ++) {
@@ -248,7 +262,8 @@ int map_node_star(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct req2s
     }
     if (t < 0) {
       if(t == -2) error_count_vlan ++;
-      else error_count_other ++;
+      else if(t == -1) error_count_other ++;
+      else if(t == -3) error_count_normal ++;
       v2s[index].map = STATE_MAP_NODE_FAIL;
       printf("req %d unsatisfied\n", index);
       for (j = 0; j < i; j ++) {
@@ -1042,7 +1057,8 @@ int allocate(int start, int end, int time) {
           release_resource(s2v_ntmp, s2v_ltmp, v2stmp, bottleneck_req);
           //printf("remove0\n");
           if(t == -2) error_count_vlan ++;
-          else error_count_other ++;
+          else if(t == -1) error_count_other ++;
+          else if(t == -3) error_count_normal ++;
           v2stmp[bottleneck_req].map = STATE_MAP_NODE_FAIL;
           trycount = 0;
           /*for (i = 0; i < req[bottleneck_req].nodes; i ++) {
@@ -1077,7 +1093,8 @@ int allocate(int start, int end, int time) {
             printf("req %d unsatisfied\n", index);
             release_resource(s2v_ntmp, s2v_ltmp, v2stmp, index);
             if(t == -2) error_count_vlan ++;
-            else error_count_other ++;
+            else if(t == -1) error_count_other ++;
+            else if(t == -3) error_count_normal ++;
             v2stmp[index].map = STATE_MAP_NODE_FAIL;
             trycount = 0;
           } else {
@@ -1423,7 +1440,7 @@ int main(int argc, char ** argv) {
         }
       }
 
-    printf("success: %d\nCPU&bw fail: %d\nVLAN fail:%d\n", done_count+map_count, error_count_other, error_count_vlan);
+    printf("success: %d\nCPU&bw fail: %d\nVLAN fail:%d\nboth fail:%d\n", done_count+map_count, error_count_other, error_count_vlan, error_count_normal);
     fprintf(ftrace, "%d %d %d %lf %lf %lf %lf %d %lf %lf\n", done_count, map_count, rej_count, done_cost, done_rev, map_cost, map_rev, done_count+map_count, done_cost + map_cost, done_rev+map_rev);
     fprintf(fp, "%s %d %d %lf %lf\n", tracename, done_count+map_count, time, (done_cost+map_cost)/time, (done_rev+map_rev)/time);
 

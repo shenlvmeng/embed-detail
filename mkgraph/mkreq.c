@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
     for (j = 0; j < num_nodes; j ++) {
       fscanf(fp, "%*d %*d %*d %*d");
       double t = rand();      
-      fprintf(reqfile, "%lf\n", t/(double)RAND_MAX * (double)MAX_CPU*0.001);      
+      fprintf(reqfile, "%lf\n", t/(double)RAND_MAX * (double)MAX_CPU*REDUCTION_RATIO);      
     }
     
     for (j = 0; j < 6; j ++) {
@@ -166,12 +166,12 @@ int main(int argc, char **argv) {
     for (j = 0; j < num_edges; j ++) {
       fscanf(fp, "%d %d %*d %*d", &from, &to);
       if (topo == TOPO_GENERAL) 
-        fprintf(reqfile, "%d %d %lf\n", from, to, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate); 
+        fprintf(reqfile, "%d %d %lf\n", from, to, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate * REDUCTION_RATIO); 
     }
 
     if (topo == TOPO_STAR) {
       for (j = 0; j < num_nodes - 1; j ++) {
-        fprintf(reqfile, "%d %d %lf\n", j, num_nodes-1, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate); 
+        fprintf(reqfile, "%d %d %lf\n", j, num_nodes-1, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate * REDUCTION_RATIO); 
       }
     }
 
