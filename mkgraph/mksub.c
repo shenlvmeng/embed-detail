@@ -19,9 +19,12 @@ int main(int argc, char **argv) {
   
   int num_nodes, num_edges, from, to;
 
+  //create itm cfg file for sub network;Noted by xym
     sprintf(filename, "itm-specsub");
     fp = fopen(filename, "w");
+  //itm arg1:graph type,arg2:graph sum;Noted by xym
     fprintf(fp, "geo 1\n");
+  //itm arg3:node sum,arg4:algorithm type,arg5,6,7:algorithm params;Noted by xym
     fprintf(fp, "%d 100 2 0.5 0.2\n", n);
     //fprintf(fp, "ts 1\n");
     //fprintf(fp, "100 1 10\n");
