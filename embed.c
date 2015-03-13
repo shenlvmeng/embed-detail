@@ -97,7 +97,7 @@ int find_MinNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
       if (sub.link[j].from == i || sub.link[j].to == i) {
         if (s2v_l[j].rest_bw > 0)
           sum += s2v_l[j].rest_bw;
-        if (s2v_l[j].rest_vlan[s2v_l[j].count] != -1)
+        if (s2v_l[j].count < MAX_VLAN_PER_LINK)
           vsum += MAX_VLAN_PER_LINK - s2v_l[j].count;
         if(sub.link[j].from == i){
             for(k = 0; k < s2v_n[sub.link[j].to].req_count; k++){
@@ -146,7 +146,7 @@ int find_MaxNeighborResource_node(struct s2v_node * s2v_n, struct s2v_link * s2v
       if (sub.link[j].from == i || sub.link[j].to == i) {
         if (s2v_l[j].rest_bw > 0)
           sum += s2v_l[j].rest_bw;
-        if (s2v_l[j].rest_vlan[s2v_l[j].count] != -1)
+        if (s2v_l[j].count < MAX_VLAN_PER_LINK)
           vsum += MAX_VLAN_PER_LINK - s2v_l[j].count;
         if(sub.link[j].from == i){
             for(k = 0; k < s2v_n[sub.link[j].to].req_count; k++){
@@ -358,7 +358,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
               if ((sub.link[k].from == from && sub.link[k].to == next) || (sub.link[k].from == next && sub.link[k].to == from)) 
                 break;
             }
-            if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] == -1) {
+            if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].count >= MAX_VLAN_PER_LINK) {
               flag = 1;
               break;
             }
@@ -396,7 +396,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
                     if ((sub.link[k].from == from && sub.link[k].to == next) || (sub.link[k].from == next && sub.link[k].to == from)) 
                       break;
                   }
-                  if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] == -1) {
+                  if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].count >= MAX_VLAN_PER_LINK) {
                     //why is 'flag' not set to 1?;Noted by xym
                     newflag = 1;
                     break;
@@ -512,8 +512,8 @@ int multicommodity_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct
       for (k = 0; k < req[j].links; k ++) {
         for (i = 0; i < arcs; i ++) {
           if (s2v_l[i/2].rest_bw < 0) s2v_l[i/2].rest_bw = 0;
-          if (s2v_l[i/2].rest_vlan[0] != -1) 
-            rest_vlan = s2v_l[i/2].rest_vlan[MAX_VLAN_PER_LINK-s2v_l[i/2].count-1];
+          if (s2v_l[i/2].count < MAX_VLAN_PER_LINK) 
+            rest_vlan = s2v_l[i/2].rest_vlan[s2v_l[i/2].count];
           else rest_vlan = -1;
           fprintf(fp, "%.2f ", s2v_l[i/2].rest_bw);
           fprintf(fp, "%d ", rest_vlan);
@@ -567,8 +567,8 @@ int multicommodity_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct
   fprintf(fp, "\n");
   for (i = 0; i < sub.links; i ++) {
     if (s2v_l[i].rest_bw < 0) s2v_l[i].rest_bw = 0;
-    if (s2v_l[i/2].rest_vlan[0] != -1) 
-        rest_vlan = s2v_l[i/2].rest_vlan[MAX_VLAN_PER_LINK-s2v_l[i/2].count-1];
+    if (s2v_l[i/2].count < MAX_VLAN_PER_LINK) 
+        rest_vlan = s2v_l[i/2].rest_vlan[s2v_l[i/2].count];
     else rest_vlan = -1;
     fprintf(fp, "%.2f ", s2v_l[i].rest_bw);
     fprintf(fp, "%d ", rest_vlan);

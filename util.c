@@ -69,7 +69,10 @@ void add_link_map(struct s2v_link * s2v_l, int slink, int reqid, int vlink) {
 
   printf("add bw reqid %d vlink %d bw %lf vlan %d\n", reqid, vlink, req[reqid].link[vlink].bw, vindex);
   s2v_l[slink].count ++;
-  printf("slink %d rest_bw %lf rest_vlan %d\n", slink, s2v_l[slink].rest_bw, s2v_l[slink].rest_vlan[s2v_l[slink].count]);
+  if(s2v_l[slink].count >= MAX_VLAN_PER_LINK)
+    printf("slink %d rest_bw %lf rest_vlan %d\n", slink, s2v_l[slink].rest_bw, -1);
+  else
+    printf("slink %d rest_bw %lf rest_vlan %d\n", slink, s2v_l[slink].rest_bw, s2v_l[slink].rest_vlan[s2v_l[slink].count]);
 }
 
 void release_split_link(struct s2v_link * s2v_l, struct req2sub * v2s, int index) {
