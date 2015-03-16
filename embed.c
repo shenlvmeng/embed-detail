@@ -1300,6 +1300,7 @@ int main(int argc, char ** argv) {
     v2s[i].map = STATE_NEW;
     req[i].revenue = 0;
 
+    //nodes节点数,links链路数,split分割度,time出现时间点,duration存活时间,topo,拓扑类型;Noted by xym
     fp = fopen(filename, "r");
     fscanf(fp, "%d %d %d %d %d %d\n", &req[i].nodes, &req[i].links, &req[i].split, &req[i].time, &req[i].duration, &req[i].topo);
 
