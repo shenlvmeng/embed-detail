@@ -10,7 +10,8 @@
 
 #define POISSON_MEAN 5 //per 100 time
 //#define POISSON_MEAN 50 //per 1000 time
-#define TOTAL_TIME 10000 //for the 100 requests
+#define TOTAL_TIME 1000 //for the 100 requests,original value--10000
+#define DURATION_STRETCH_RATE 2
 
 #define RAND_MAX 2147483647
 
@@ -128,6 +129,7 @@ int main(int argc, char **argv) {
       p ++; 
     }
 
+    //modify TOTAL_TIME to change frequency of VNE requests;Noted by xym
     time = start + (countk+1)*TOTAL_TIME*POISSON_MEAN/(n*(k+1));
     countk ++;
 
@@ -136,7 +138,8 @@ int main(int argc, char **argv) {
     } else {
       duration = SHORT_REQ_DURATION;
       }*/
-    duration = (int)(-log(rand()/(double)RAND_MAX)*1000);
+    //multiplicate a constant to change duration of each VNE requests;Noted by xym
+    duration = (int)(-log(rand()/(double)RAND_MAX)*1000)*DURATION_STRETCH_RATE;
 
     if (rand()/(double)RAND_MAX < topo_general_rate) {
       topo = TOPO_GENERAL;
