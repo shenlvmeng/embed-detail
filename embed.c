@@ -303,7 +303,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
               if ((sub.link[k].from == from && sub.link[k].to == next) || (sub.link[k].from == next && sub.link[k].to == from)) 
                 break;
             }
-            if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] == -1) {
+            if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].count >= MAX_VLAN_PER_LINK) {
               flag = 1;
               break;
             }
@@ -341,7 +341,7 @@ int unsplittable_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct r
                     if ((sub.link[k].from == from && sub.link[k].to == next) || (sub.link[k].from == next && sub.link[k].to == from)) 
                       break;
                   }
-                  if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].rest_vlan[s2v_ltmp3[k].count] == -1) {
+                  if (k >= sub.links || s2v_ltmp3[k].rest_bw < req[i].link[j].bw || s2v_ltmp3[k].count >= MAX_VLAN_PER_LINK) {
                     //why is 'flag' not set to 1?;Noted by xym
                     newflag = 1;
                     break;
@@ -457,8 +457,8 @@ int multicommodity_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct
       for (k = 0; k < req[j].links; k ++) {
         for (i = 0; i < arcs; i ++) {
           if (s2v_l[i/2].rest_bw < 0) s2v_l[i/2].rest_bw = 0;
-          if (s2v_l[i/2].rest_vlan[0] != -1) 
-            rest_vlan = s2v_l[i/2].rest_vlan[MAX_VLAN_PER_LINK-s2v_l[i/2].count-1];
+          if (s2v_l[i/2].count < MAX_VLAN_PER_LINK) 
+            rest_vlan = s2v_l[i/2].rest_vlan[s2v_l[i/2].count];
           else rest_vlan = -1;
           fprintf(fp, "%.2f ", s2v_l[i/2].rest_bw);
           fprintf(fp, "%d ", rest_vlan);
@@ -512,8 +512,8 @@ int multicommodity_flow(struct s2v_node * s2v_n, struct s2v_link * s2v_l, struct
   fprintf(fp, "\n");
   for (i = 0; i < sub.links; i ++) {
     if (s2v_l[i].rest_bw < 0) s2v_l[i].rest_bw = 0;
-    if (s2v_l[i/2].rest_vlan[0] != -1) 
-        rest_vlan = s2v_l[i/2].rest_vlan[MAX_VLAN_PER_LINK-s2v_l[i/2].count-1];
+    if (s2v_l[i/2].count < MAX_VLAN_PER_LINK) 
+        rest_vlan = s2v_l[i/2].rest_vlan[s2v_l[i/2].count];
     else rest_vlan = -1;
     fprintf(fp, "%.2f ", s2v_l[i].rest_bw);
     fprintf(fp, "%d ", rest_vlan);
@@ -809,6 +809,7 @@ double calculate_cost(struct req2sub * v2s, int start, int end) {
         bwsum += req[i].link[j].bw;
         //reqcost += req[i].link[j].bw * v2s[i].spath[j].len;
         reqcost += v2s[i].spath[j].bw * v2s[i].spath[j].len;
+        reqcost += 1 * v2s[i].spath[j].len;
       }
       opcost +=reqcost;
       count ++;
@@ -1248,7 +1249,7 @@ int main(int argc, char ** argv) {
 
     for (j = 0; j < req[i].links; j ++) {
       fscanf(fp, "%d %d %lf\n", &req[i].link[j].from, &req[i].link[j].to, &req[i].link[j].bw);
-      req[i].revenue += req[i].link[j].bw;
+      req[i].revenue += (req[i].link[j].bw+1);
     }    
 
     fclose(fp);

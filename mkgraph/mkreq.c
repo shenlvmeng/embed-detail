@@ -10,7 +10,8 @@
 
 #define POISSON_MEAN 5 //per 100 time
 //#define POISSON_MEAN 50 //per 1000 time
-#define TOTAL_TIME 10000 //for the 100 requests
+#define TOTAL_TIME 1000 //for the 100 requests
+#define DURATION_STRETCH_RATE 2
 
 #define RAND_MAX 2147483647
 
@@ -136,7 +137,7 @@ int main(int argc, char **argv) {
     } else {
       duration = SHORT_REQ_DURATION;
       }*/
-    duration = (int)(-log(rand()/(double)RAND_MAX)*1000);
+    duration = (int)(-log(rand()/(double)RAND_MAX)*1000)*DURATION_STRETCH_RATE;
 
     if (rand()/(double)RAND_MAX < topo_general_rate) {
       topo = TOPO_GENERAL;
@@ -155,7 +156,7 @@ int main(int argc, char **argv) {
     for (j = 0; j < num_nodes; j ++) {
       fscanf(fp, "%*d %*d %*d %*d");
       double t = rand();      
-      fprintf(reqfile, "%lf\n", t/(double)RAND_MAX * (double)MAX_CPU*0.001);      
+      fprintf(reqfile, "%lf\n", t/(double)RAND_MAX * (double)MAX_CPU*REDUCTION_RATIO);      
     }
     
     for (j = 0; j < 6; j ++) {
@@ -166,12 +167,12 @@ int main(int argc, char **argv) {
     for (j = 0; j < num_edges; j ++) {
       fscanf(fp, "%d %d %*d %*d", &from, &to);
       if (topo == TOPO_GENERAL) 
-        fprintf(reqfile, "%d %d %lf\n", from, to, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate); 
+        fprintf(reqfile, "%d %d %lf\n", from, to, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate * REDUCTION_RATIO); 
     }
 
     if (topo == TOPO_STAR) {
       for (j = 0; j < num_nodes - 1; j ++) {
-        fprintf(reqfile, "%d %d %lf\n", j, num_nodes-1, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate); 
+        fprintf(reqfile, "%d %d %lf\n", j, num_nodes-1, rand()/(double)RAND_MAX * (double)MAX_BW * link_rate * REDUCTION_RATIO); 
       }
     }
 

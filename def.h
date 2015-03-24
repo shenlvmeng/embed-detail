@@ -18,6 +18,7 @@
 
 #define MAX_CPU 100
 #define MAX_BW 100
+#define REDUCTION_RATIO 0.001
 
 #define MAX_NECK_COUNT 100
 
